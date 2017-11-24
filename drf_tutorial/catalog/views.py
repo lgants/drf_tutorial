@@ -1,4 +1,17 @@
 from django.http import HttpResponse
+from rest_framework import generics
+from rest_framework.response import Response
+from .models import Product
+from .serializers import ProductSerializer
+
+# ListCreateAPIView is used for read-write endpoints to represent a collection of model instances
+class ProductList(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+"""
+from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Product
@@ -18,6 +31,7 @@ class ProductList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+"""
 
 
 """
@@ -27,7 +41,7 @@ from rest_framework.response import Response
 from .models import Product
 from .serializers import ProductSerializer
 
-
+# ListAPIView is used for read-only endpoints to represent a collection of model instances
 class ProductList(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
