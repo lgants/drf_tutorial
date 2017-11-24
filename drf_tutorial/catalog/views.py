@@ -3,12 +3,13 @@ from rest_framework import generics
 from rest_framework.response import Response
 from .models import Product
 from .serializers import ProductSerializer
+from .permissions import IsAdminOrReadOnly
 
 # ListCreateAPIView is used for read-write endpoints to represent a collection of model instances
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
+    permission_classes = (IsAdminOrReadOnly, )
 
 """
 from django.http import HttpResponse
