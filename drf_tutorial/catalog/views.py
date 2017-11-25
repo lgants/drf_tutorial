@@ -12,24 +12,30 @@ class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = (IsAdminOrReadOnly, )
+    lookup_url_kwarg = 'product_id'
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = (IsAdminOrReadOnly, )
+    lookup_url_kwarg = 'product_id'
 
 
 class ReviewList(generics.ListCreateAPIView):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
+    lookup_url_kwarg = 'product_id'
 
     # Need to manually customise the perform_create method because the default one doesn't know to set the created_by and product_id fields
     def perform_create(self, serializer):
         serializer.save(
             created_by=self.request.user,
-            product_id=self.kwargs['pk'])
+            product_id=self.kwargs['product_id'])
+
+    def get_queryset(self):
+        product = self.kwargs['product_id']
+        return Review.objects.filter(product__id=product)
 
 
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
