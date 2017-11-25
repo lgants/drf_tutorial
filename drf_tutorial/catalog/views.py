@@ -1,10 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .models import Product
-from .serializers import ProductSerializer
-from .permissions import IsAdminOrReadOnly
+from .models import Product, Review
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from django.http import Http404
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .serializers import ProductSerializer, ReviewSerializer
 
 # ListCreateAPIView is used for read-write endpoints to represent a collection of model instances
 class ProductList(generics.ListCreateAPIView):
@@ -17,6 +18,28 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = (IsAdminOrReadOnly, )
+
+
+class ReviewList(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, )
+
+    # Need to manually customise the perform_create method because the default one doesn't know to set the created_by and product_id fields
+    def perform_create(self, serializer):
+        serializer.save(
+            created_by=self.request.user,
+            product_id=self.kwargs['pk'])
+
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    lookup_url_kwarg = 'review_id'
+
+    def get_queryset(self):
+        review = self.kwargs['review_id']
+        return Review.objects.filter(id=review)
 
 
 """
